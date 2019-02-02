@@ -77,7 +77,7 @@ def createLobby():
 def deleteLobby():
     # delete lobby from lobbies list and DB entry
     # lobbyCode = request.json['lobbyCode']
-    lobbyCode = request.args['lobbyCode']
+    lobbyCode = request.json['lobbyCode']
 
     # remove lobby from server array
     for lobby in lobbies:
@@ -97,8 +97,8 @@ def deleteLobby():
     
 @app.route('/addVideo', methods=['POST'])
 def addVideo():
-    lobbyCode = request.args['lobbyCode']
-    videoId = request.args['videoId']
+    lobbyCode = request.json['lobbyCode']
+    videoId = request.json['videoId']
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
@@ -109,7 +109,7 @@ def addVideo():
 
 @app.route('/getNextVideo', methods=['POST',])
 def getNextVideo():
-    lobbyCode = request.args['lobbyCode']
+    lobbyCode = request.json['lobbyCode']
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
@@ -119,7 +119,7 @@ def getNextVideo():
 
 @app.route('/getVideoQueue', methods=['POST'])
 def getVideoQueue():
-    lobbyCode = request.args['lobbyCode']
+    lobbyCode = request.json['lobbyCode']
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
@@ -169,7 +169,19 @@ def leaveLobby():
     else:
         return memberName + " has been removed from " + lobbyCode
 
+@app.route('/getLobbyInfo', methods=['GET'])
+def getLobbyInfo():
+    lobbyCode = request.args['lobbyCode']
 
+    lobbyWasFound = False
+    lobbyInfo = {}
+
+    for lobby in lobbies:
+        if(lobby.getLobbyCode() == lobbyCode):
+            return json.dumps(lobby.getInfo())
+
+    return 'Lobby wasn\'t found'
+    
 
 
 class JSONEncoder(json.JSONEncoder):
