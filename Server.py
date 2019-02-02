@@ -42,7 +42,7 @@ def startServer():
 def getVersion():
     return json.dumps(version)
 
-@app.route('/createLobby', methods=['POST', 'GET'])
+@app.route('/createLobby', methods=['POST'])
 def createLobby():
     client = MongoClient(DBURL + ":27017")
     db = client.Clubin_tv
@@ -73,7 +73,7 @@ def createLobby():
     # return JSONEncoder().encode(res.inserted_id)
     return randomCode
 
-@app.route('/deleteLobby', methods=['POST','GET'])
+@app.route('/deleteLobby', methods=['POST'])
 def deleteLobby():
     # delete lobby from lobbies list and DB entry
     # lobbyCode = request.json['lobbyCode']
@@ -95,7 +95,7 @@ def deleteLobby():
 
     return JSONEncoder().encode(lobbies)
     
-@app.route('/addVideo', methods=['POST','GET'])
+@app.route('/addVideo', methods=['POST'])
 def addVideo():
     lobbyCode = request.args['lobbyCode']
     videoId = request.args['videoId']
@@ -107,7 +107,7 @@ def addVideo():
 
     return "Didn't find lobby"
 
-@app.route('/getNextVideo', methods=['POST','GET'])
+@app.route('/getNextVideo', methods=['POST',])
 def getNextVideo():
     lobbyCode = request.args['lobbyCode']
 
@@ -117,7 +117,7 @@ def getNextVideo():
 
     return "Didn't find lobby"
 
-@app.route('/getVideoQueue', methods=['POST','GET'])
+@app.route('/getVideoQueue', methods=['POST'])
 def getVideoQueue():
     lobbyCode = request.args['lobbyCode']
 
@@ -126,6 +126,50 @@ def getVideoQueue():
             return JSONEncoder().encode(lobby.getVideoQueue())
 
     return "Didn't find lobby"
+
+@app.route('/joinLobby', methods=['POST'])
+def joinLobby():
+    lobbyCode = request.json['lobbyCode'].upper()
+    memberName = request.json['memberName']
+
+    lobbyWasFound = False
+
+    for lobby in lobbies:
+        if(lobby.getLobbyCode() == lobbyCode):
+            # requested lobby exist, let them join
+            lobby.addMember(memberName)
+            lobbyWasFound = True
+            print(lobby)
+            break
+
+    returnRes = {}
+
+    if(not lobbyWasFound):
+        returnRes = {'didJoin': False, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Invalid lobby ID'}
+    else:
+        returnRes = {'didJoin': True, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Success'}
+        
+    return json.dumps(returnRes)
+
+@app.route('/leaveLobby', methods=['POST'])
+def leaveLobby():
+    lobbyCode = request.json['lobbyCode'].upper()
+    memberName = request.json['memberName']
+
+    for lobby in lobbies:
+        if(lobby.getLobbyCode() == lobbyCode):
+            # requested lobby exist, remove them from the lobby
+            lobby.deleteMember(memberName)
+            lobbyWasFound = True
+            print(lobby)
+            break
+
+    if(not lobbyWasFound):
+        return "Invalid lobby ID"
+    else:
+        return memberName + " has been removed from " + lobbyCode
+
+
 
 
 class JSONEncoder(json.JSONEncoder):

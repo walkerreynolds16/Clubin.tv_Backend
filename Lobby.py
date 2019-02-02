@@ -3,9 +3,10 @@ class Lobby:
     def __init__(self, lobbyCode):
         self.lobbyCode = lobbyCode
         self.videoQueue = []
+        self.memberList = []
 
     def __str__(self):
-        return self.lobbyCode
+        return self.lobbyCode + " - " + str(self.memberList)
 
     def getLobbyCode(self):
         return self.lobbyCode
@@ -18,3 +19,9 @@ class Lobby:
 
     def addVideoToQueue(self, videoId):
         self.videoQueue.append(videoId)
+
+    def addMember(self, memberName):
+        self.memberList.append(memberName)
+
+    def deleteMember(self, memberName):
+        self.memberList.remove(memberName)
