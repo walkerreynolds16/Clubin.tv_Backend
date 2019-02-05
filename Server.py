@@ -143,7 +143,7 @@ def joinLobby():
             break
 
     returnRes = {}
-
+    
     if(not lobbyWasFound):
         returnRes = {'didJoin': False, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Invalid lobby ID'}
     else:
@@ -155,6 +155,8 @@ def joinLobby():
 def leaveLobby():
     lobbyCode = request.json['lobbyCode'].upper()
     memberName = request.json['memberName']
+
+    lobbyWasFound = False
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
