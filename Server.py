@@ -22,6 +22,7 @@ version = '0.001'
 lobbies = []
 
 
+
 # Web server stuff
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'onesouth'
@@ -143,7 +144,7 @@ def joinLobby():
             break
 
     returnRes = {}
-    
+
     if(not lobbyWasFound):
         returnRes = {'didJoin': False, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Invalid lobby ID'}
     else:
