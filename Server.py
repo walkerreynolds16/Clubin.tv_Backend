@@ -22,7 +22,6 @@ version = '0.001'
 lobbies = []
 
 
-
 # Web server stuff
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'onesouth'
