@@ -70,7 +70,8 @@ def createLobby():
 
     newLobby = Lobby(randomCode)
     lobbies.append(newLobby)
-    print(lobbies)
+    for l in lobbies:
+        print(l)
 
     res = collection.insert_one({'lobbyCode': randomCode, 'connectedUsers': 0, 'dateCreated': datetime.datetime.now()})
     # return JSONEncoder().encode(res.inserted_id)
@@ -139,16 +140,19 @@ def joinLobby():
     lobbyCode = request.json['lobbyCode'].upper()
     memberName = request.json['memberName']
 
+    print(lobbyCode)
+
     global lobbies
 
     lobbyWasFound = False
 
     for lobby in lobbies:
+        print(lobby)
         if(lobby.getLobbyCode() == lobbyCode):
             # requested lobby exist, let them join
             lobby.addMember(memberName)
             lobbyWasFound = True
-            print(lobby)
+            print('found lobby')
             break
 
     returnRes = {}
