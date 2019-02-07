@@ -66,6 +66,8 @@ def createLobby():
             # Code IS NOT in use
             createdLobby = True
 
+    global lobbies
+
     newLobby = Lobby(randomCode)
     lobbies.append(newLobby)
     print(lobbies)
@@ -79,6 +81,8 @@ def deleteLobby():
     # delete lobby from lobbies list and DB entry
     # lobbyCode = request.json['lobbyCode']
     lobbyCode = request.json['lobbyCode']
+
+    global lobbies
 
     # remove lobby from server array
     for lobby in lobbies:
@@ -100,6 +104,7 @@ def deleteLobby():
 def addVideo():
     lobbyCode = request.json['lobbyCode']
     videoId = request.json['videoId']
+    global lobbies
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
@@ -111,7 +116,7 @@ def addVideo():
 @app.route('/getNextVideo', methods=['POST',])
 def getNextVideo():
     lobbyCode = request.json['lobbyCode']
-
+    global lobbies
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
             return lobby.getNextVideo()
@@ -121,6 +126,7 @@ def getNextVideo():
 @app.route('/getVideoQueue', methods=['POST'])
 def getVideoQueue():
     lobbyCode = request.json['lobbyCode']
+    global lobbies
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
@@ -132,6 +138,8 @@ def getVideoQueue():
 def joinLobby():
     lobbyCode = request.json['lobbyCode'].upper()
     memberName = request.json['memberName']
+
+    global lobbies
 
     lobbyWasFound = False
 
@@ -158,6 +166,7 @@ def leaveLobby():
     memberName = request.json['memberName']
 
     lobbyWasFound = False
+    global lobbies
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
@@ -178,6 +187,7 @@ def getLobbyInfo():
 
     lobbyWasFound = False
     lobbyInfo = {}
+    global lobbies
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
