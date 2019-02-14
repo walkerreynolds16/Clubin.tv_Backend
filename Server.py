@@ -20,7 +20,7 @@ from Lobby import Lobby
 # Fields for the Server
 version = '0.001'
 lobbies = []
-
+clients = []
 
 
 # Web server stuff
@@ -104,12 +104,13 @@ def deleteLobby():
 @app.route('/addVideo', methods=['POST'])
 def addVideo():
     lobbyCode = request.json['lobbyCode']
-    videoId = request.json['videoId']
+    memberName = request.json['memberName']
+    video = request.json['video']
     global lobbies
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
-            lobby.addVideoToQueue(videoId)
+            lobby.addVideoToQueue(video['videoId'])
             return JSONEncoder().encode(lobby.getVideoQueue())
 
     return "Didn't find lobby"
@@ -143,8 +144,10 @@ def joinLobby():
     print(lobbyCode)
 
     global lobbies
+    global clients
 
     lobbyWasFound = False
+    lobbyInfo = {}
 
     for lobby in lobbies:
         print(lobby)
@@ -152,8 +155,10 @@ def joinLobby():
             # requested lobby exist, let them join
             lobby.addMember(memberName)
             lobbyWasFound = True
+            lobbyInfo = lobby.getInfo()
             print('found lobby')
             break
+
 
     returnRes = {}
 
@@ -161,6 +166,11 @@ def joinLobby():
         returnRes = {'didJoin': False, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Invalid lobby ID'}
     else:
         returnRes = {'didJoin': True, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Success'}
+
+        for c in clients:
+            if(c['lobbyCode'] == lobbyCode):
+                socketio.emit('Event_lobbyUpdate', lobbyInfo, room=c['requestId'])
+        
         
     return json.dumps(returnRes)
 
@@ -199,6 +209,10 @@ def getLobbyInfo():
 
     return 'Lobby wasn\'t found'
     
+@socketio.on('Event_connection')
+def clientConnection(data):
+    print(request.sid + " connected")
+    clients.append({'lobbyCode': data['lobbyCode'], 'requestId': request.sid})
 
 
 class JSONEncoder(json.JSONEncoder):
