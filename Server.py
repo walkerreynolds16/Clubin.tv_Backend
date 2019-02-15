@@ -110,7 +110,7 @@ def addVideo():
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
-            lobby.addVideoToQueue(video['videoId'])
+            lobby.addVideoToQueue(video)
             return JSONEncoder().encode(lobby.getVideoQueue())
 
     return "Didn't find lobby"
@@ -213,6 +213,17 @@ def getLobbyInfo():
 def clientConnection(data):
     print(request.sid + " connected")
     clients.append({'lobbyCode': data['lobbyCode'], 'requestId': request.sid})
+
+@socketio.on('Event_disconnection')
+def clientConnection(data):
+    # TODO delete lobby with data['lobbyCode']
+    print(request.sid + " disconnected")
+
+    global clients
+
+    for c in clients:
+        if(c['lobbyCode'] == data['lobbyCode']):
+            clients.remove(c)
 
 
 class JSONEncoder(json.JSONEncoder):
