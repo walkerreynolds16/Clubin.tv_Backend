@@ -127,7 +127,7 @@ def addVideo():
                     # Detect whether to send a startVideo event to client
                     if(lobby.getCurrentVideo() == {}): # if no one is playing a video
                         lobby.setCurrentVideo(video, memberName)
-                        socketio.emit('Event_startVideo', {"memberName": memberName, 'Video': video}, room=c['requestId'])
+                        socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=c['requestId'])
 
             
             
@@ -197,6 +197,7 @@ def joinLobby():
 
 @app.route('/leaveLobby', methods=['POST'])
 def leaveLobby():
+    # TODO added socket emit to update client
     lobbyCode = request.json['lobbyCode'].upper()
     memberName = request.json['memberName']
 
