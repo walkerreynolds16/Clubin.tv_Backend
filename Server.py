@@ -107,10 +107,16 @@ def addVideo():
     memberName = request.json['memberName']
     video = request.json['video']
     global lobbies
+    global clients
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
             lobby.addVideoToQueue(video)
+
+            for c in clients:
+                if(c['lobbyCode'] == lobbyCode):
+                    socketio.emit('Event_lobbyUpdate', lobbyInfo, room=c['requestId'])
+
             return JSONEncoder().encode(lobby.getVideoQueue())
 
     return "Didn't find lobby"
