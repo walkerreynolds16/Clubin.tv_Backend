@@ -109,10 +109,13 @@ def addVideo():
     global lobbies
     global clients
 
+    lobbyInfo = {}
+
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
             lobby.addVideoToQueue(video)
-
+            lobbyInfo = lobby.getInfo()
+            
             for c in clients:
                 if(c['lobbyCode'] == lobbyCode):
                     socketio.emit('Event_lobbyUpdate', lobbyInfo, room=c['requestId'])
