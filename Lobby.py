@@ -1,10 +1,12 @@
+import json
+
 class Lobby:
 
     def __init__(self, lobbyCode):
         self.lobbyCode = lobbyCode
         self.videoQueue = []
         self.memberList = []
-        self.currentVideo = {}
+        self.currentVideo = {} # keep track of current DJ and video
 
     def __str__(self):
         return self.lobbyCode + " - " + str(self.memberList)
@@ -25,13 +27,18 @@ class Lobby:
         return newVid
 
     def getCurrentVideo(self):
-        if(self.currentVideo is {}):
-            return "No video playing"
-        else:
-            return self.currentVideo
+        return self.currentVideo
 
-    def addVideoToQueue(self, videoId):
-        self.videoQueue.append(videoId)
+    def setCurrentVideo(self, video, memberName):
+        print('video: ' + json.dumps(video))
+        print('memberName: ' + memberName)
+        if(video != None and memberName != None):
+            self.currentVideo = {"memberName": memberName, "video": video}
+        else:
+            self.currentVideo = {}
+
+    def addVideoToQueue(self, video, memberName):
+        self.videoQueue.append(video)
 
     def addMember(self, memberName):
         self.memberList.append(memberName)

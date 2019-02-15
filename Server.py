@@ -113,12 +113,24 @@ def addVideo():
 
     for lobby in lobbies:
         if(lobby.getLobbyCode() == lobbyCode):
-            lobby.addVideoToQueue(video)
+            # Add video to the lobbies queue
+            lobby.addVideoToQueue(video, memberName)
+
+            # Retrieve lobby info to send to the lobby android client
             lobbyInfo = lobby.getInfo()
-            
+
+            # Find client and send it lobby info
             for c in clients:
                 if(c['lobbyCode'] == lobbyCode):
                     socketio.emit('Event_lobbyUpdate', lobbyInfo, room=c['requestId'])
+
+                    # Detect whether to send a startVideo event to client
+                    if(lobby.getCurrentVideo() == {}): # if no one is playing a video
+                        lobby.setCurrentVideo(video, memberName)
+                        socketio.emit('Event_startVideo', {"memberName": memberName, 'Video': video}, room=c['requestId'])
+
+            
+            
 
             return JSONEncoder().encode(lobby.getVideoQueue())
 
@@ -225,7 +237,6 @@ def clientConnection(data):
 
 @socketio.on('Event_disconnection')
 def clientConnection(data):
-    # TODO delete lobby with data['lobbyCode']
     print(request.sid + " disconnected")
 
     global clients
@@ -234,6 +245,10 @@ def clientConnection(data):
         if(c['lobbyCode'] == data['lobbyCode']):
             clients.remove(c)
 
+
+@socketio.on('Event_endVideo')
+def endVideo(data):
+    print(request.sid + " has ended a video")
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
