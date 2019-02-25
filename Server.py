@@ -128,8 +128,6 @@ def addVideo():
                     if(lobby.getCurrentVideo() == {}): # if no one is playing a video
                         lobby.setCurrentVideo(video, memberName)
                         socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=c['requestId'])
-
-            
             
 
             return JSONEncoder().encode(lobby.getVideoQueue())
@@ -246,10 +244,13 @@ def clientConnection(data):
         if(c['lobbyCode'] == data['lobbyCode']):
             clients.remove(c)
 
-
 @socketio.on('Event_endVideo')
 def endVideo(data):
     print(request.sid + " has ended a video")
+    print(data['lobbyCode'])
+    print(data['currentVideo'])
+
+
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
