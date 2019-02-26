@@ -258,6 +258,7 @@ def endVideo(data):
 
     if(lobby != None):
         newVid = lobby.getNextVideo()
+        lobby.setCurrentVideo(None, None)
 
         if(newVid != -1 and client != None):
             lobby.setCurrentVideo(newVid, memberName)
