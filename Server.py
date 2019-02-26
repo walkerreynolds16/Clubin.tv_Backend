@@ -106,44 +106,35 @@ def addVideo():
     lobbyCode = request.json['lobbyCode']
     memberName = request.json['memberName']
     video = request.json['video']
-    global lobbies
-    global clients
 
-    lobbyInfo = {}
+    lobby = getLobbyObject(lobbyCode)
+    client = getClientObject(lobbyCode)
 
-    for lobby in lobbies:
-        if(lobby.getLobbyCode() == lobbyCode):
-            # Add video to the lobbies queue
+    if(lobby != None):
+        if(lobby.getCurrentVideo() == {}):
+            lobby.setCurrentVideo(video, memberName)
+        else:
             lobby.addVideoToQueue(video, memberName)
 
-            # Retrieve lobby info to send to the lobby android client
-            lobbyInfo = lobby.getInfo()
+        # Retrieve lobby info to send to the lobby android client
+        lobbyInfo = lobby.getInfo()
+    
+        socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['requestId'])
 
-            # Find client and send it lobby info
-            for c in clients:
-                if(c['lobbyCode'] == lobbyCode):
-                    socketio.emit('Event_lobbyUpdate', lobbyInfo, room=c['requestId'])
+        return JSONEncoder().encode(lobby.getVideoQueue())
 
-                    # Detect whether to send a startVideo event to client
-                    if(lobby.getCurrentVideo() == {}): # if no one is playing a video
-                        newVid = lobby.getNextVideo()
-                        lobby.setCurrentVideo(newVid, memberName)
-                        socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'], 'channelName': newVid['channelName']}}, room=c['requestId'])
-            
+    else:
+        return "Didn't find lobby"
 
-            return JSONEncoder().encode(lobby.getVideoQueue())
+# @app.route('/getNextVideo', methods=['POST',])
+# def getNextVideo():
+#     lobbyCode = request.json['lobbyCode']
+#     global lobbies
+#     for lobby in lobbies:
+#         if(lobby.getLobbyCode() == lobbyCode):
+#             return lobby.getNextVideo()
 
-    return "Didn't find lobby"
-
-@app.route('/getNextVideo', methods=['POST',])
-def getNextVideo():
-    lobbyCode = request.json['lobbyCode']
-    global lobbies
-    for lobby in lobbies:
-        if(lobby.getLobbyCode() == lobbyCode):
-            return lobby.getNextVideo()
-
-    return "Didn't find lobby"
+#     return "Didn't find lobby"
 
 @app.route('/getVideoQueue', methods=['POST'])
 def getVideoQueue():
@@ -161,36 +152,22 @@ def joinLobby():
     lobbyCode = request.json['lobbyCode'].upper()
     memberName = request.json['memberName']
 
-    print(lobbyCode)
-
-    global lobbies
-    global clients
-
-    lobbyWasFound = False
-    lobbyInfo = {}
-
-    for lobby in lobbies:
-        print(lobby)
-        if(lobby.getLobbyCode() == lobbyCode):
-            # requested lobby exist, let them join
-            lobby.addMember(memberName)
-            lobbyWasFound = True
-            lobbyInfo = lobby.getInfo()
-            print('found lobby')
-            break
-
+    lobby = getLobbyObject(lobbyCode)
+    client = getClientObject(lobbyCode)
 
     returnRes = {}
 
-    if(not lobbyWasFound):
-        returnRes = {'didJoin': False, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Invalid lobby ID'}
-    else:
+    if(lobby != None):
+        # requested lobby exist, let them join
+        lobby.addMember(memberName)
+        lobbyInfo = lobby.getInfo()
+
+        socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['requestId'])
+
         returnRes = {'didJoin': True, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Success'}
 
-        for c in clients:
-            if(c['lobbyCode'] == lobbyCode):
-                socketio.emit('Event_lobbyUpdate', lobbyInfo, room=c['requestId'])
-        
+    else:
+        returnRes = {'didJoin': False, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Invalid lobby ID'}
         
     return json.dumps(returnRes)
 
@@ -230,6 +207,8 @@ def getLobbyInfo():
 
     return 'Lobby wasn\'t found'
     
+
+
 @socketio.on('Event_connection')
 def clientConnection(data):
     print(request.sid + " connected")
@@ -261,11 +240,8 @@ def endVideo(data):
         lobby.setCurrentVideo(None, None)
 
         if(newVid != -1 and client != None):
-            lobby.setCurrentVideo(newVid, memberName)
-            socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'], 'channelName': newVid['channelName']}}, room=client['requestId'])
-            
-
-
+            lobby.setCurrentVideo(newVid['video'], newVid['memberName'] )
+            socketio.emit('Event_startVideo', {"currentVideo": {"memberName": newVid['memberName'], 'videoId': newVid['video']['videoId'], 'videoTitle': newVid['video']['videoTitle'], 'channelName': newVid['video']['channelName']}}, room=client['requestId'])
             
 
 

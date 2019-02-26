@@ -37,12 +37,12 @@ class Lobby:
         if(video != None and memberName != None):
             print('video: ' + json.dumps(video))
             print('memberName: ' + memberName)
-            self.currentVideo = {"memberName": memberName, "video": video}
+            self.currentVideo = {"memberName": memberName, "videoId": video['videoId'], "channelName": video['channelName'], "videoTitle": video['videoId']}
         else:
             self.currentVideo = {}
 
     def addVideoToQueue(self, video, memberName):
-        self.videoQueue.append(video)
+        self.videoQueue.append({"video": video, 'memberName': memberName})
 
     def addMember(self, memberName):
         self.memberList.append(memberName)
