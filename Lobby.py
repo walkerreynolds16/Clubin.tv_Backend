@@ -34,9 +34,9 @@ class Lobby:
         return self.currentVideo
 
     def setCurrentVideo(self, video, memberName):
-        print('video: ' + json.dumps(video))
-        print('memberName: ' + memberName)
         if(video != None and memberName != None):
+            print('video: ' + json.dumps(video))
+            print('memberName: ' + memberName)
             self.currentVideo = {"memberName": memberName, "video": video}
         else:
             self.currentVideo = {}
