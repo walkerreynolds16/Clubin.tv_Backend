@@ -22,9 +22,13 @@ class Lobby:
         return self.videoQueue
 
     def getNextVideo(self):
-        newVid = self.videoQueue.pop(0)
-        self.currentVideo = newVid
-        return newVid
+        if(len(self.videoQueue) > 0):
+            newVid = self.videoQueue.pop(0)
+            self.currentVideo = newVid
+            return newVid
+        else:
+            return -1
+        
 
     def getCurrentVideo(self):
         return self.currentVideo

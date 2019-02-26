@@ -126,8 +126,9 @@ def addVideo():
 
                     # Detect whether to send a startVideo event to client
                     if(lobby.getCurrentVideo() == {}): # if no one is playing a video
-                        lobby.setCurrentVideo(video, memberName)
-                        socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=c['requestId'])
+                        newVid = lobby.getNextVideo()
+                        lobby.setCurrentVideo(newVid, memberName)
+                        socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'], 'channelName': newVid['channelName']}}, room=c['requestId'])
             
 
             return JSONEncoder().encode(lobby.getVideoQueue())
@@ -235,7 +236,7 @@ def clientConnection(data):
     clients.append({'lobbyCode': data['lobbyCode'], 'requestId': request.sid})
 
 @socketio.on('Event_disconnection')
-def clientConnection(data):
+def clientDisconnection(data):
     print(request.sid + " disconnected")
 
     global clients
@@ -250,7 +251,40 @@ def endVideo(data):
     print(data['lobbyCode'])
     print(data['currentVideo'])
 
+    global lobbies
 
+    lobby = getLobbyObject(data['lobbyCode'])
+    client = getClientObject(data['lobbyCode'])
+
+    if(lobby != None):
+        newVid = lobby.getNextVideo()
+
+        if(newVid != -1 and client != None):
+            lobby.setCurrentVideo(newVid, memberName)
+            socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'], 'channelName': newVid['channelName']}}, room=client['requestId'])
+            
+
+
+            
+
+
+def getLobbyObject(lobbyCode):
+    global lobbies
+
+    for lobby in lobbies:
+        if(lobby.getLobbyCode() == lobbyCode):
+            return lobby
+
+    return None
+
+def getClientObject(lobbyCode):
+    global clients
+
+    for c in clients:
+        if(c['lobbyCode'] == lobbyCode):
+            return c
+
+    return None
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
