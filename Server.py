@@ -126,15 +126,6 @@ def addVideo():
     else:
         return "Didn't find lobby"
 
-# @app.route('/getNextVideo', methods=['POST',])
-# def getNextVideo():
-#     lobbyCode = request.json['lobbyCode']
-#     global lobbies
-#     for lobby in lobbies:
-#         if(lobby.getLobbyCode() == lobbyCode):
-#             return lobby.getNextVideo()
-
-#     return "Didn't find lobby"
 
 @app.route('/getVideoQueue', methods=['POST'])
 def getVideoQueue():
@@ -177,21 +168,20 @@ def leaveLobby():
     lobbyCode = request.json['lobbyCode'].upper()
     memberName = request.json['memberName']
 
-    lobbyWasFound = False
-    global lobbies
+    lobby = getLobbyObject(lobbyCode)
+    client = getClientObject(lobbyCode)
 
-    for lobby in lobbies:
-        if(lobby.getLobbyCode() == lobbyCode):
-            # requested lobby exist, remove them from the lobby
-            lobby.deleteMember(memberName)
-            lobbyWasFound = True
-            print(lobby)
-            break
+    if(lobby != None):
+        # requested lobby exist, remove them from the lobby
+        lobby.deleteMember(memberName)
 
-    if(not lobbyWasFound):
-        return "Invalid lobby ID"
-    else:
+        lobbyInfo = lobby.getInfo()
+        socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['requestId'])        
+
         return memberName + " has been removed from " + lobbyCode
+    else:
+         return "Invalid lobby ID"
+
 
 @app.route('/getLobbyInfo', methods=['GET'])
 def getLobbyInfo():

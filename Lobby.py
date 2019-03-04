@@ -37,7 +37,7 @@ class Lobby:
         if(video != None and memberName != None):
             print('video: ' + json.dumps(video))
             print('memberName: ' + memberName)
-            self.currentVideo = {"memberName": memberName, "videoId": video['videoId'], "channelName": video['channelName'], "videoTitle": video['videoId']}
+            self.currentVideo = {"memberName": memberName, "videoId": video['videoId'], "channelName": video['channelName'], "videoTitle": video['videoTitle']}
         else:
             self.currentVideo = {}
 
