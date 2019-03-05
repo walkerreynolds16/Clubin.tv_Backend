@@ -113,6 +113,7 @@ def addVideo():
     if(lobby != None):
         if(lobby.getCurrentVideo() == {}):
             lobby.setCurrentVideo(video, memberName)
+            socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=client['requestId'])            
         else:
             lobby.addVideoToQueue(video, memberName)
 
@@ -168,6 +169,9 @@ def leaveLobby():
     lobbyCode = request.json['lobbyCode'].upper()
     memberName = request.json['memberName']
 
+    print("Lobby Code = " + lobbyCode)
+    print("Member Name = " + memberName)
+
     lobby = getLobbyObject(lobbyCode)
     client = getClientObject(lobbyCode)
 
@@ -176,8 +180,9 @@ def leaveLobby():
         lobby.deleteMember(memberName)
 
         lobbyInfo = lobby.getInfo()
-        socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['requestId'])        
-
+        socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['requestId'])  
+              
+        print(memberName + " has been removed from " + lobbyCode)
         return memberName + " has been removed from " + lobbyCode
     else:
          return "Invalid lobby ID"
@@ -220,8 +225,6 @@ def endVideo(data):
     print(data['lobbyCode'])
     print(data['currentVideo'])
 
-    global lobbies
-
     lobby = getLobbyObject(data['lobbyCode'])
     client = getClientObject(data['lobbyCode'])
 
@@ -232,7 +235,7 @@ def endVideo(data):
         if(newVid != -1 and client != None):
             lobby.setCurrentVideo(newVid['video'], newVid['memberName'] )
             socketio.emit('Event_startVideo', {"currentVideo": {"memberName": newVid['memberName'], 'videoId': newVid['video']['videoId'], 'videoTitle': newVid['video']['videoTitle'], 'channelName': newVid['video']['channelName']}}, room=client['requestId'])
-            
+        
 
 
 def getLobbyObject(lobbyCode):
