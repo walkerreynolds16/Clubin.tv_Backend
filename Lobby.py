@@ -28,7 +28,6 @@ class Lobby:
             return newVid
         else:
             return -1
-        
 
     def getCurrentVideo(self):
         return self.currentVideo

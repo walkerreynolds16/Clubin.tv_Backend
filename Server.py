@@ -171,9 +171,12 @@ def leaveLobby():
 
     print("Lobby Code = " + lobbyCode)
     print("Member Name = " + memberName)
+    
 
     lobby = getLobbyObject(lobbyCode)
     client = getClientObject(lobbyCode)
+
+    print("Member List = " + str(lobby.getInfo()["memberList"]))
 
     if(lobby != None):
         # requested lobby exist, remove them from the lobby
@@ -181,7 +184,7 @@ def leaveLobby():
 
         lobbyInfo = lobby.getInfo()
         socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['requestId'])  
-              
+
         print(memberName + " has been removed from " + lobbyCode)
         return memberName + " has been removed from " + lobbyCode
     else:
