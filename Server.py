@@ -113,14 +113,23 @@ def addVideo():
     if(lobby != None):
         if(lobby.getCurrentVideo() == {}):
             lobby.setCurrentVideo(video, memberName)
-            socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=client['requestId'])            
+
+            if(client != None):
+                socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=client['androidRequestId'])            
+
+                
+
+
         else:
             lobby.addVideoToQueue(video, memberName)
 
         # Retrieve lobby info to send to the lobby android client
         lobbyInfo = lobby.getInfo()
-    
-        socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['requestId'])
+        if(client != None):
+            socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['androidRequestId'])
+
+            for c in client['mobileClients']:
+                    socketio.emit('Event_lobbyUpdate', lobbyInfo, room=c['requestId'])
 
         return JSONEncoder().encode(lobby.getVideoQueue())
 
@@ -154,7 +163,11 @@ def joinLobby():
         lobby.addMember(memberName)
         lobbyInfo = lobby.getInfo()
 
-        socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['requestId'])
+        if(client != None):
+            socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['androidRequestId'])
+
+            for c in client['mobileClients']:
+                socketio.emit('Event_lobbyUpdate', lobbyInfo, room=c['requestId'])
 
         returnRes = {'didJoin': True, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Success'}
 
@@ -183,7 +196,17 @@ def leaveLobby():
         lobby.deleteMember(memberName)
 
         lobbyInfo = lobby.getInfo()
-        socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['requestId'])  
+
+        if(client != None):
+            socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['androidRequestId'])
+
+            for c in client['mobileClients']:
+                socketio.emit('Event_lobbyUpdate', lobbyInfo, room=c['requestId'])
+
+            for mClient in client['mobileClients']:
+                if(mClient['memberName'] == memberName):
+                    client['mobileClients'].remove(mClient)
+            
 
         print(memberName + " has been removed from " + lobbyCode)
         return memberName + " has been removed from " + lobbyCode
@@ -209,8 +232,25 @@ def getLobbyInfo():
 
 @socketio.on('Event_connection')
 def clientConnection(data):
-    print(request.sid + " connected")
-    clients.append({'lobbyCode': data['lobbyCode'], 'requestId': request.sid})
+    print(request.sid + " connected from android")
+    clients.append({'lobbyCode': data['lobbyCode'], 'androidRequestId': request.sid, 'mobileClients': []})
+
+@socketio.on('Event_mobileConnection')
+def mobileClientConnection(data):
+    print(request.sid + " connected from mobile")
+
+    global clients
+
+    lobby = getLobbyObject(data['lobbyCode'])
+
+    for client in clients:
+        if(client['lobbyCode'] == data['lobbyCode']):
+            client['mobileClients'].append({'requestId': request.sid, 'memberName': data['memberName']})
+
+            for c in client['mobileClients']:
+                socketio.emit('Event_lobbyUpdate', lobby.getInfo(), room=c['requestId'])
+
+    print(clients)            
 
 @socketio.on('Event_disconnection')
 def clientDisconnection(data):
@@ -218,9 +258,14 @@ def clientDisconnection(data):
 
     global clients
 
+    lobby = getLobbyObject(data['lobbyCode'])
+
     for c in clients:
         if(c['lobbyCode'] == data['lobbyCode']):
             clients.remove(c)
+
+            for c in client['mobileClients']:
+                socketio.emit('Event_lobbyUpdate', lobby.getInfo(), room=c['requestId'])
 
 @socketio.on('Event_endVideo')
 def endVideo(data):
@@ -235,10 +280,14 @@ def endVideo(data):
         newVid = lobby.getNextVideo()
         lobby.setCurrentVideo(None, None)
 
-        if(newVid != -1 and client != None):
+        if(newVid != -1):
             lobby.setCurrentVideo(newVid['video'], newVid['memberName'] )
-            socketio.emit('Event_startVideo', {"currentVideo": {"memberName": newVid['memberName'], 'videoId': newVid['video']['videoId'], 'videoTitle': newVid['video']['videoTitle'], 'channelName': newVid['video']['channelName']}}, room=client['requestId'])
-        
+
+            if(client != None):
+                socketio.emit('Event_startVideo', {"currentVideo": {"memberName": newVid['memberName'], 'videoId': newVid['video']['videoId'], 'videoTitle': newVid['video']['videoTitle'], 'channelName': newVid['video']['channelName']}}, room=client['androidRequestId'])
+
+                for c in client['mobileClients']:
+                    socketio.emit('Event_lobbyUpdate', lobby.getInfo(), room=c['requestId'])
 
 
 def getLobbyObject(lobbyCode):
