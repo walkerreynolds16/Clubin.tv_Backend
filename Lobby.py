@@ -7,12 +7,13 @@ class Lobby:
         self.videoQueue = []
         self.memberList = []
         self.currentVideo = {} # keep track of current DJ and video
+        self.playingVideo = False
 
     def __str__(self):
         return self.lobbyCode + " - " + str(self.memberList)
 
     def getInfo(self):
-        data = {'lobbyCode': self.lobbyCode, 'videoQueue': self.videoQueue, 'memberList': self.memberList, 'currentVideo': self.getCurrentVideo()}
+        data = {'lobbyCode': self.lobbyCode, 'videoQueue': self.videoQueue, 'memberList': self.memberList, 'currentVideo': self.getCurrentVideo(), 'playingVideo': self.playingVideo}
         return data
 
     def getLobbyCode(self):
@@ -41,10 +42,16 @@ class Lobby:
             self.currentVideo = {}
 
     def addVideoToQueue(self, video, memberName):
-        self.videoQueue.append({"video": video, 'memberName': memberName})
+        self.videoQueue.append({'memberName': memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']})
 
     def addMember(self, memberName):
         self.memberList.append(memberName)
 
     def deleteMember(self, memberName):
         self.memberList.remove(memberName)
+
+    def getPlayingVideo(self):
+        return self.playingVideo
+
+    def setPlayingVideo(self, playing):
+        self.playingVideo = playing
