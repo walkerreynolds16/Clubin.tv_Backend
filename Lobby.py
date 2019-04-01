@@ -1,19 +1,21 @@
 import json
 
+
 class Lobby:
 
     def __init__(self, lobbyCode):
         self.lobbyCode = lobbyCode
         self.videoQueue = []
         self.memberList = []
-        self.currentVideo = {} # keep track of current DJ and video
+        self.currentVideo = {}  # keep track of current DJ and video
         self.playingVideo = False
 
     def __str__(self):
         return self.lobbyCode + " - " + str(self.memberList)
 
     def getInfo(self):
-        data = {'lobbyCode': self.lobbyCode, 'videoQueue': self.videoQueue, 'memberList': self.memberList, 'currentVideo': self.getCurrentVideo(), 'playingVideo': self.playingVideo}
+        data = {'lobbyCode': self.lobbyCode, 'videoQueue': self.videoQueue, 'memberList': self.memberList,
+                'currentVideo': self.getCurrentVideo(), 'playingVideo': self.playingVideo}
         return data
 
     def getLobbyCode(self):
@@ -37,12 +39,14 @@ class Lobby:
         if(video != None and memberName != None):
             print('video: ' + json.dumps(video))
             print('memberName: ' + memberName)
-            self.currentVideo = {"memberName": memberName, "videoId": video['videoId'], "channelName": video['channelName'], "videoTitle": video['videoTitle']}
+            self.currentVideo = {"memberName": memberName,
+                                 "videoId": video['videoId'], "channelName": video['channelName'], "videoTitle": video['videoTitle']}
         else:
             self.currentVideo = {}
 
     def addVideoToQueue(self, video, memberName):
-        self.videoQueue.append({'memberName': memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']})
+        self.videoQueue.append(
+            {'memberName': memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']})
 
     def addMember(self, memberName):
         self.memberList.append(memberName)

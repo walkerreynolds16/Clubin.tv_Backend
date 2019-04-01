@@ -1,21 +1,19 @@
+from Lobby import Lobby
+import datetime
+import json
+import string
+import random
+from flask_socketio import SocketIO, send, emit
+from bson import ObjectId, Timestamp, json_util
+from pymongo import MongoClient
+from flask_cors import CORS
+from flask import Flask, request, jsonify, json
+import os
 import eventlet
 eventlet.monkey_patch()
 
-import os
 os.environ['EVENTLET_NO_GREENDNS'] = 'yes'
 
-from flask import Flask, request, jsonify, json
-from flask_cors import CORS
-from pymongo import MongoClient
-from bson import ObjectId, Timestamp, json_util
-from flask_socketio import SocketIO, send, emit
-import random
-import string
-import json
-import datetime
-
-
-from Lobby import Lobby
 
 # Fields for the Server
 version = '0.001'
@@ -32,6 +30,7 @@ CORS(app)
 # DB URL
 DBURL = 'mongodb+srv://walkerreynolds16:onesouth@thelargecluster-ybjdm.mongodb.net/test?retryWrites=true'
 
+
 def startServer():
     client = MongoClient(DBURL + ":27017")
     db = client.Clubin_tv
@@ -39,9 +38,11 @@ def startServer():
     collection = db['Lobbies']
     collection.delete_many({})
 
+
 @app.route('/getVersion', methods=['GET'])
 def getVersion():
     return json.dumps(version)
+
 
 @app.route('/createLobby', methods=['POST'])
 def createLobby():
@@ -53,11 +54,11 @@ def createLobby():
     createdLobby = False
     randomCode = ''
 
-    while(not createdLobby): # Loop creates a new lobby code and checks if its being used
+    while(not createdLobby):  # Loop creates a new lobby code and checks if its being used
         randomCode = ''
         for i in range(4):
             randomCode += random.choice(string.ascii_uppercase)
-        
+
         playlist = collection.find_one({'lobbyCode': randomCode})
 
         # if lobby code isn't being used, break out of loop
@@ -73,9 +74,11 @@ def createLobby():
     for l in lobbies:
         print(l)
 
-    res = collection.insert_one({'lobbyCode': randomCode, 'connectedUsers': 0, 'dateCreated': datetime.datetime.now()})
+    res = collection.insert_one(
+        {'lobbyCode': randomCode, 'connectedUsers': 0, 'dateCreated': datetime.datetime.now()})
     # return JSONEncoder().encode(res.inserted_id)
     return randomCode
+
 
 @app.route('/deleteLobby', methods=['POST'])
 def deleteLobby():
@@ -90,7 +93,7 @@ def deleteLobby():
         if(lobby.getLobbyCode() == lobbyCode):
             lobbies.remove(lobby)
             break
-    
+
     client = MongoClient(DBURL + ":27017")
     db = client.Clubin_tv
 
@@ -100,7 +103,8 @@ def deleteLobby():
     print(res.deleted_count)
 
     return JSONEncoder().encode(lobbies)
-    
+
+
 @app.route('/addVideo', methods=['POST'])
 def addVideo():
     lobbyCode = request.json['lobbyCode']
@@ -117,7 +121,7 @@ def addVideo():
         #     lobby.setCurrentVideo(video, memberName)
 
         #     if(client != None):
-        #         socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=client['androidRequestId'])            
+        #         socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=client['androidRequestId'])
 
         # else:
         lobby.addVideoToQueue(video, memberName)
@@ -125,7 +129,8 @@ def addVideo():
         # Retrieve lobby info to send to the lobby android client
         lobbyInfo = lobby.getInfo()
         if(client != None):
-            socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['androidRequestId'])
+            socketio.emit('Event_lobbyUpdate', lobbyInfo,
+                          room=client['androidRequestId'])
 
             # Update mobile clients
             updateMobileClients(lobbyCode, "video added")
@@ -147,6 +152,7 @@ def getVideoQueue():
 
     return "Didn't find lobby"
 
+
 @app.route('/joinLobby', methods=['POST'])
 def joinLobby():
     lobbyCode = request.json['lobbyCode'].upper()
@@ -163,17 +169,21 @@ def joinLobby():
         lobbyInfo = lobby.getInfo()
 
         if(client != None):
-            socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['androidRequestId'])
+            socketio.emit('Event_lobbyUpdate', lobbyInfo,
+                          room=client['androidRequestId'])
 
             # Update mobile clients
             updateMobileClients(lobbyCode, "member joining lobby")
 
-        returnRes = {'didJoin': True, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Success'}
+        returnRes = {'didJoin': True, 'lobbyCode': lobbyCode,
+                     'memberName': memberName, 'Message': 'Success'}
 
     else:
-        returnRes = {'didJoin': False, 'lobbyCode': lobbyCode, 'memberName': memberName, 'Message': 'Invalid lobby ID'}
-        
+        returnRes = {'didJoin': False, 'lobbyCode': lobbyCode,
+                     'memberName': memberName, 'Message': 'Invalid lobby ID'}
+
     return json.dumps(returnRes)
+
 
 @app.route('/leaveLobby', methods=['POST'])
 def leaveLobby():
@@ -183,7 +193,6 @@ def leaveLobby():
 
     print("Lobby Code = " + lobbyCode)
     print("Member Name = " + memberName)
-    
 
     lobby = getLobbyObject(lobbyCode)
     client = getClientObject(lobbyCode)
@@ -197,22 +206,22 @@ def leaveLobby():
         lobbyInfo = lobby.getInfo()
 
         if(client != None):
-        
+
             for mClient in client['mobileClients']:
                 if(mClient['memberName'] == memberName):
                     client['mobileClients'].remove(mClient)
 
             # Update Android app
-            socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['androidRequestId'])
+            socketio.emit('Event_lobbyUpdate', lobbyInfo,
+                          room=client['androidRequestId'])
 
             # Update mobile clients
             updateMobileClients(lobbyCode, "member leaving lobby")
-            
 
         print(memberName + " has been removed from " + lobbyCode)
         return memberName + " has been removed from " + lobbyCode
     else:
-         return "Invalid lobby ID"
+        return "Invalid lobby ID"
 
 
 @app.route('/getLobbyInfo', methods=['GET'])
@@ -228,13 +237,14 @@ def getLobbyInfo():
             return json.dumps(lobby.getInfo())
 
     return 'Lobby wasn\'t found'
-    
 
 
 @socketio.on('Event_connection')
 def clientConnection(data):
     print(request.sid + " connected from android")
-    clients.append({'lobbyCode': data['lobbyCode'], 'androidRequestId': request.sid, 'mobileClients': []})
+    clients.append(
+        {'lobbyCode': data['lobbyCode'], 'androidRequestId': request.sid, 'mobileClients': []})
+
 
 @socketio.on('Event_mobileConnection')
 def mobileClientConnection(data):
@@ -245,10 +255,12 @@ def mobileClientConnection(data):
     lobby = getLobbyObject(data['lobbyCode'])
     client = getClientObject(data['lobbyCode'])
 
-    client['mobileClients'].append({'requestId': request.sid, 'memberName': data['memberName']})
+    client['mobileClients'].append(
+        {'requestId': request.sid, 'memberName': data['memberName']})
     updateMobileClients(data['lobbyCode'], "client connecting")
 
-    print(clients)            
+    print(clients)
+
 
 @socketio.on('Event_disconnection')
 def clientDisconnection(data):
@@ -262,6 +274,7 @@ def clientDisconnection(data):
         if(c['lobbyCode'] == data['lobbyCode']):
             clients.remove(c)
             updateMobileClients(data['lobbyCode'], "client disconnecting")
+
 
 @socketio.on('Event_endVideo')
 def endVideo(data):
@@ -277,12 +290,14 @@ def endVideo(data):
         lobby.setCurrentVideo(None, None)
 
         if(newVid != -1):
-            lobby.setCurrentVideo(newVid['video'], newVid['memberName'] )
+            lobby.setCurrentVideo(newVid['video'], newVid['memberName'])
 
             if(client != None):
-                socketio.emit('Event_startVideo', {"currentVideo": {"memberName": newVid['memberName'], 'videoId': newVid['video']['videoId'], 'videoTitle': newVid['video']['videoTitle'], 'channelName': newVid['video']['channelName']}}, room=client['androidRequestId'])
+                socketio.emit('Event_startVideo', {"currentVideo": {"memberName": newVid['memberName'], 'videoId': newVid['video']['videoId'],
+                                                                    'videoTitle': newVid['video']['videoTitle'], 'channelName': newVid['video']['channelName']}}, room=client['androidRequestId'])
                 updateMobileClients(data['lobbyCode'], "ending video")
-                
+
+
 @socketio.on('Event_startingVideo')
 def startingVideo(lobbyCode):
     print(lobbyCode + " has started watching videos")
@@ -290,11 +305,13 @@ def startingVideo(lobbyCode):
     lobby = getLobbyObject(lobbyCode)
     lobby.setPlayingVideo(True)
 
-    newVid = lobby.getNextVideo()
+    newVid = lobby.getNextVideo
 
-    lobby.setCurrentVideo({'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'], 'channelName': newVid['channelName']}, newVid['memberName'])
+    lobby.setCurrentVideo({'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'],
+                           'channelName': newVid['channelName']}, newVid['memberName'])
 
     updateMobileClients(lobby.getLobbyCode(), 'first video starting')
+
 
 def updateMobileClients(lobbyCode, message):
     lobby = getLobbyObject(lobbyCode)
@@ -303,7 +320,9 @@ def updateMobileClients(lobbyCode, message):
     if(client != None):
         for c in client['mobileClients']:
             print("updating " + c['memberName'] + " for " + message)
-            socketio.emit('Event_lobbyUpdate', lobby.getInfo(), room=c['requestId'])
+            socketio.emit('Event_lobbyUpdate',
+                          lobby.getInfo(), room=c['requestId'])
+
 
 def getLobbyObject(lobbyCode):
     global lobbies
@@ -314,6 +333,7 @@ def getLobbyObject(lobbyCode):
 
     return None
 
+
 def getClientObject(lobbyCode):
     global clients
 
@@ -322,6 +342,7 @@ def getClientObject(lobbyCode):
             return c
 
     return None
+
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
