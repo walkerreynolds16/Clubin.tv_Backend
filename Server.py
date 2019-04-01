@@ -113,14 +113,14 @@ def addVideo():
 
     if(lobby != None):
         # if there isn't a video being played
-        if(lobby.getCurrentVideo() == {} and lobby.getPlayingVideo()):
-            lobby.setCurrentVideo(video, memberName)
+        # if(lobby.getCurrentVideo() == {} and lobby.getPlayingVideo()):
+        #     lobby.setCurrentVideo(video, memberName)
 
-            if(client != None):
-                socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=client['androidRequestId'])            
+        #     if(client != None):
+        #         socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=client['androidRequestId'])            
 
-        else:
-            lobby.addVideoToQueue(video, memberName)
+        # else:
+        lobby.addVideoToQueue(video, memberName)
 
         # Retrieve lobby info to send to the lobby android client
         lobbyInfo = lobby.getInfo()
@@ -243,11 +243,10 @@ def mobileClientConnection(data):
     global clients
 
     lobby = getLobbyObject(data['lobbyCode'])
+    client = getClientObject(data['lobbyCode'])
 
-    for client in clients:
-        if(client['lobbyCode'] == data['lobbyCode']):
-            client['mobileClients'].append({'requestId': request.sid, 'memberName': data['memberName']})
-            updateMobileClients(data['lobbyCode'], "client connecting")
+    client['mobileClients'].append({'requestId': request.sid, 'memberName': data['memberName']})
+    updateMobileClients(data['lobbyCode'], "client connecting")
 
     print(clients)            
 
@@ -291,7 +290,7 @@ def startingVideo(lobbyCode):
     lobby = getLobbyObject(lobbyCode)
     lobby.setPlayingVideo(True)
 
-    newVid = lobby.getVideoQueue().pop()
+    newVid = lobby.getNextVideo()
 
     lobby.setCurrentVideo({'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'], 'channelName': newVid['channelName']}, newVid['memberName'])
 
