@@ -28,7 +28,8 @@ socketio = SocketIO(app)
 CORS(app)
 
 # DB URL
-DBURL = 'mongodb+srv://walkerreynolds16:onesouth@thelargecluster-ybjdm.mongodb.net/test?retryWrites=true'
+# DBURL = 'mongodb+srv://walkerreynolds16:onesouth@thelargecluster-ybjdm.mongodb.net/test?retryWrites=true'
+DBURL = 'mongodb://walkerreynolds16:onesouth@thelargecluster-shard-00-00-ybjdm.mongodb.net:27017,thelargecluster-shard-00-01-ybjdm.mongodb.net:27017,thelargecluster-shard-00-02-ybjdm.mongodb.net:27017/test?ssl=true&replicaSet=TheLargeCluster-shard-0&authSource=admin&retryWrites=true'
 
 
 def startServer():
