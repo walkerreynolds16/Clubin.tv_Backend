@@ -9,13 +9,14 @@ class Lobby:
         self.memberList = []
         self.currentVideo = {}  # keep track of current DJ and video
         self.playingVideo = False
+        self.skippers = []
 
     def __str__(self):
         return self.lobbyCode + " - " + str(self.memberList)
 
     def getInfo(self):
         data = {'lobbyCode': self.lobbyCode, 'videoQueue': self.videoQueue, 'memberList': self.memberList,
-                'currentVideo': self.getCurrentVideo(), 'playingVideo': self.playingVideo}
+                'currentVideo': self.getCurrentVideo(), 'playingVideo': self.playingVideo, 'skippers': self.skippers}
         return data
 
     def getLobbyCode(self):
@@ -59,3 +60,18 @@ class Lobby:
 
     def setPlayingVideo(self, playing):
         self.playingVideo = playing
+
+    def getSkippers(self):
+        return self.skippers
+    
+    def setSkippers(self, newList):
+        self.skippers = newList
+
+    def voteToSkip(self, memberName):
+        if(memberName in self.skippers):
+            self.skippers.remove(memberName)
+        else:
+            self.skippers.append(memberName)
+
+    def getMemberList(self):
+        return self.memberList
