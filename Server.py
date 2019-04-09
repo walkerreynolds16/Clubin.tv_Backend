@@ -1,19 +1,21 @@
-from Lobby import Lobby
-import datetime
-import json
-import string
-import random
-from flask_socketio import SocketIO, send, emit
-from bson import ObjectId, Timestamp, json_util
-from pymongo import MongoClient
-from flask_cors import CORS
-from flask import Flask, request, jsonify, json
-import os
 import eventlet
 eventlet.monkey_patch()
 
+import os
 os.environ['EVENTLET_NO_GREENDNS'] = 'yes'
 
+from flask import Flask, request, jsonify, json
+from flask_cors import CORS
+from pymongo import MongoClient
+from bson import ObjectId, Timestamp, json_util
+from flask_socketio import SocketIO, send, emit
+import random
+import string
+import json
+import datetime
+
+
+from Lobby import Lobby
 
 # Fields for the Server
 version = '0.001'
