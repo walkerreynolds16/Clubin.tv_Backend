@@ -57,7 +57,7 @@ class Lobby:
 
     def addVideoToQueue(self, video, memberName):
         self.videoQueue.append(
-            {'memberName': memberName, 'video': {'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}})
+            {'memberName': memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']})
 
     def addMember(self, memberName):
         self.memberList.append(memberName)

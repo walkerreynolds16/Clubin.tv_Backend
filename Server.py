@@ -307,7 +307,9 @@ def endVideo(data):
         lobby.setSkippers([])
 
         if(newVid != -1):
-            lobby.setCurrentVideo(newVid['video'], newVid['memberName'])
+            # lobby.setCurrentVideo(newVid['video'], newVid['memberName'])
+            lobby.setCurrentVideo({'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'],'channelName': newVid['channelName']}, newVid['memberName'])
+
 
             if(client != None):
                 socketio.emit('Event_startVideo', {"currentVideo": {"memberName": newVid['memberName'], 'videoId': newVid['video']['videoId'],'videoTitle': newVid['video']['videoTitle'], 'channelName': newVid['video']['channelName']}}, room=client['androidRequestId'])
@@ -325,9 +327,9 @@ def startingVideo(lobbyCode):
     print('New vid')
     print(newVid)
 
-    lobby.setCurrentVideo(newVid['video'], newVid['memberName'])
+    # lobby.setCurrentVideo(newVid['video'], newVid['memberName'])
 
-    # lobby.setCurrentVideo({'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'],'channelName': newVid['channelName']}, newVid['memberName'])
+    lobby.setCurrentVideo({'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'],'channelName': newVid['channelName']}, newVid['memberName'])
 
     updateMobileClients(lobby.getLobbyCode(), 'first video starting')
 
