@@ -349,7 +349,16 @@ def voteSkip(data):
 
     updateMobileClients(lobbyCode, "Vote processed")
 
+@socketio.on('Event_updateLobbyInfo')
+def updateLobbyInfo(data):
+    lobbyCode = data['lobbyCode']
+    memberName = data['memberName']
+    lobbyInfo = data['lobbyInfo']
 
+    lobby = getLobbyObject(lobbyCode)
+    lobby.setInfo(lobbyInfo)
+
+    updateMobileClients(lobbyCode, str(memberName) + " has updated the lobby info")
 
 def updateMobileClients(lobbyCode, message):
     lobby = getLobbyObject(lobbyCode)

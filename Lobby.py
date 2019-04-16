@@ -19,11 +19,21 @@ class Lobby:
                 'currentVideo': self.getCurrentVideo(), 'playingVideo': self.playingVideo, 'skippers': self.skippers}
         return data
 
+    def setInfo(self, info):
+        self.videoQueue = info['videoQueue']
+        self.memberList = info['memberList']
+        self.currentVideo = info['currentVideo']
+        self.playingVideo = info['playingVideo']
+        self.skippers = info['skippers']
+
     def getLobbyCode(self):
         return self.lobbyCode
 
     def getVideoQueue(self):
         return self.videoQueue
+
+    def setVideoQueue(self, videoQueue):
+        self.videoQueue = videoQueue
 
     def getNextVideo(self):
         if(len(self.videoQueue) > 0):
