@@ -312,7 +312,7 @@ def endVideo(data):
 
 
             if(client != None):
-                socketio.emit('Event_startVideo', {"currentVideo": {"memberName": newVid['memberName'], 'videoId': newVid['video']['videoId'],'videoTitle': newVid['video']['videoTitle'], 'channelName': newVid['video']['channelName']}}, room=client['androidRequestId'])
+                socketio.emit('Event_startVideo', {"currentVideo": {"memberName": newVid['memberName'], 'videoId': newVid['videoId'],'videoTitle': newVid['videoTitle'], 'channelName': ['channelName']}}, room=client['androidRequestId'])
                 updateMobileClients(data['lobbyCode'], "ending video")
 
 
