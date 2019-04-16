@@ -301,6 +301,8 @@ def endVideo(data):
 
     if(lobby != None):
         newVid = lobby.getNextVideo()
+        print('new vid')
+        print(str(newVid))
         lobby.setCurrentVideo(None, None)
         lobby.setSkippers([])
 
@@ -323,7 +325,9 @@ def startingVideo(lobbyCode):
     print('New vid')
     print(newVid)
 
-    lobby.setCurrentVideo({'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'],'channelName': newVid['channelName']}, newVid['memberName'])
+    lobby.setCurrentVideo(newVid['video'], newVid['memberName'])
+
+    # lobby.setCurrentVideo({'videoId': newVid['videoId'], 'videoTitle': newVid['videoTitle'],'channelName': newVid['channelName']}, newVid['memberName'])
 
     updateMobileClients(lobby.getLobbyCode(), 'first video starting')
 
