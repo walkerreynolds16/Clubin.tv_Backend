@@ -356,7 +356,10 @@ def updateLobbyInfo(data):
     lobbyInfo = data['lobbyInfo']
 
     lobby = getLobbyObject(lobbyCode)
+    client = getClientObject(lobbyCode)
     lobby.setInfo(lobbyInfo)
+
+    socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['androidRequestId'])
 
     updateMobileClients(lobbyCode, str(memberName) + " has updated the lobby info")
 
