@@ -83,6 +83,7 @@ def createLobby():
     return randomCode
 
 
+
 @app.route('/deleteLobby', methods=['POST'])
 def deleteLobby():
     # delete lobby from lobbies list and DB entry
