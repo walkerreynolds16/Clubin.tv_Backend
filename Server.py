@@ -91,14 +91,18 @@ def deleteLobby():
 
     global lobbies
 
-    # remove lobby from server array
-    for lobby in lobbies:
-        if(lobby.getLobbyCode() == lobbyCode):
-            lobbies.remove(lobby)
-            break
+    lobby = getLobbyObject(lobbyCode)
+    client1 = getClientObject(lobbyCode)
+    lobbyInfo = lobby.getInfo()
 
-    client = MongoClient(DBURL + ":27017")
-    db = client.Clubin_tv
+    # Update users
+    for c in client1['mobileClients']:
+        socketio.emit('Event_lobbyWasDeleted', lobbyInfo, room=c['requestId'])
+
+    lobbies.remove(Lobby)
+
+    MDB = MongoClient(DBURL + ":27017")
+    db = MDB.Clubin_tv
 
     collection = db['Lobbies']
 
