@@ -125,14 +125,14 @@ def addVideo():
 
     if(lobby != None):
         # if there isn't a video being played
-        # if(lobby.getCurrentVideo() == {} and lobby.getPlayingVideo()):
-        #     lobby.setCurrentVideo(video, memberName)
+        if(lobby.getCurrentVideo() == {} and lobby.getPlayingVideo()):
+            lobby.setCurrentVideo(video, memberName)
 
-        #     if(client != None):
-        #         socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=client['androidRequestId'])
+            if(client != None):
+                socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=client['androidRequestId'])
 
-        # else:
-        lobby.addVideoToQueue(video, memberName)
+        else:
+            lobby.addVideoToQueue(video, memberName)
 
         # Retrieve lobby info to send to the lobby android client
         lobbyInfo = lobby.getInfo()
@@ -309,7 +309,9 @@ def endVideo(data):
         print('new vid')
         print(str(newVid))
         lobby.setCurrentVideo(None, None)
-        lobby.setSkippers([])
+        print('lobby')
+        print(lobby)
+        lobby.clearSkippers()
 
         if(newVid != -1):
             # lobby.setCurrentVideo(newVid['video'], newVid['memberName'])
@@ -320,6 +322,10 @@ def endVideo(data):
                 obj = {"currentVideo": {"memberName": newVid['memberName'], 'videoId': newVid['videoId'],'videoTitle': newVid['videoTitle'], 'channelName': newVid['channelName']}}
                 socketio.emit('Event_startVideo', {'currentVideo': lobby.getCurrentVideo()}, room=client['androidRequestId'])
                 updateMobileClients(data['lobbyCode'], "ending video")
+        else:
+            lobby.setPlayingVideo(False)
+            if(client != None):
+                updateMobileClients(data['lobbyCode'], "vote to skip with no next video")
 
 
 @socketio.on('Event_startingVideo')
@@ -357,7 +363,7 @@ def voteSkip(data):
     if(skipPercent > .50): # If over 50% of the members want to skip, send a skip event to the android app
         client = getClientObject(lobbyCode)
         socketio.emit('Event_skipVideo', {'skippers': lobbyInfo['skippers']}, room=client['androidRequestId'])
-        lobby.setSkippers = []
+        lobby.clearSkippers()
 
     updateMobileClients(lobbyCode, "Vote processed")
 

@@ -74,8 +74,9 @@ class Lobby:
     def getSkippers(self):
         return self.skippers
     
-    def setSkippers(self, newList):
-        self.skippers = newList
+    def clearSkippers(self):
+        self.skippers = []
+        
 
     def voteToSkip(self, memberName):
         if(memberName in self.skippers):
