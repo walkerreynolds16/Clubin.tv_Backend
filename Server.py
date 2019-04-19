@@ -125,20 +125,24 @@ def addVideo():
 
     if(lobby != None):
         # if there isn't a video being played
-        if(lobby.getCurrentVideo() == {} and lobby.getPlayingVideo()):
+        print(lobby.getCurrentVideo())
+        print(lobby.getPlayingVideo())
+
+        if(lobby.getCurrentVideo() == {} and lobby.getHasStarted()):
+            print("Starting another video")
             lobby.setCurrentVideo(video, memberName)
+            print(video)
 
             if(client != None):
                 socketio.emit('Event_startVideo', {"currentVideo": {"memberName": memberName, 'videoId': video['videoId'], 'videoTitle': video['videoTitle'], 'channelName': video['channelName']}}, room=client['androidRequestId'])
-
+                lobby.setPlayingVideo(True)
         else:
             lobby.addVideoToQueue(video, memberName)
 
         # Retrieve lobby info to send to the lobby android client
         lobbyInfo = lobby.getInfo()
         if(client != None):
-            socketio.emit('Event_lobbyUpdate', lobbyInfo,
-                          room=client['androidRequestId'])
+            socketio.emit('Event_lobbyUpdate', lobbyInfo, room=client['androidRequestId'])
 
             # Update mobile clients
             updateMobileClients(lobbyCode, "video added")
@@ -334,6 +338,7 @@ def startingVideo(lobbyCode):
 
     lobby = getLobbyObject(lobbyCode)
     lobby.setPlayingVideo(True)
+    lobby.setHasStarted(True)
 
     newVid = lobby.getNextVideo()
     print('New vid')

@@ -10,6 +10,7 @@ class Lobby:
         self.currentVideo = {}  # keep track of current DJ and video
         self.playingVideo = False
         self.skippers = []
+        self.hasStarted = False
 
     def __str__(self):
         return self.lobbyCode + " - " + str(self.memberList)
@@ -86,3 +87,9 @@ class Lobby:
 
     def getMemberList(self):
         return self.memberList
+
+    def getHasStarted(self):
+        return self.hasStarted
+
+    def setHasStarted(self, started):
+        self.hasStarted = started
